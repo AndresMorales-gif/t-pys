@@ -1,6 +1,6 @@
 from typing import Dict
 
-from lpp.token import TokenType
+from lpp.utils.type import TokenType
 
 
 TOKENS: Dict[str, TokenType] = {
@@ -13,4 +13,8 @@ TOKENS: Dict[str, TokenType] = {
   '}': TokenType.RBRACE,
   ',': TokenType.COMMA,
   ';': TokenType.SEMICOLON
+}
+
+KEIWORDS: Dict[str, TokenType] = {
+  'let': TokenType.LET
 }

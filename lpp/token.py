@@ -1,27 +1,8 @@
-from enum import (
-  auto,
-  Enum,
-  unique
-)
-from typing import NamedTuple
+from typing import Dict, NamedTuple
 
+from lpp.utils.const import KEIWORDS
+from lpp.utils.type import TokenType
 
-@unique
-class TokenType(Enum):
-  ASSIGN = auto()
-  COMMA = auto()
-  EOF = auto()
-  FUNCTION = auto()
-  IDENT = auto()
-  ILLEGAL = auto()
-  INT = auto()
-  LBRACE  = auto()
-  LET = auto()
-  LPAREN = auto()
-  PLUS = auto()
-  RBRACE = auto()
-  RPAREN = auto()
-  SEMICOLON = auto()
 
 class Token(NamedTuple):
   token_type: TokenType
@@ -29,3 +10,7 @@ class Token(NamedTuple):
 
   def __str__(self) -> str:
     return f'Type: {self.token_type}, Literal: {self.literal}'
+
+
+def lookup_token_type(literal: str) -> TokenType:
+  return KEIWORDS.get(literal, TokenType.IDENT)

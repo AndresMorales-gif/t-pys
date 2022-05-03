@@ -2,7 +2,8 @@ from typing import List
 from unittest import TestCase
 
 from lpp.lexer import Lexer
-from lpp.token import Token, TokenType
+from lpp.token import Token
+from lpp.utils.type import TokenType
 
 
 class LexerTest(TestCase):
@@ -16,9 +17,9 @@ class LexerTest(TestCase):
       tokens.append(lexer.next_token())
 
     expected_tokens: List[Token] = [
-      Token(TokenType.ILLEGAL, '¡'),
-      Token(TokenType.ILLEGAL, '¿'),
-      Token(TokenType.ILLEGAL, '@')
+        Token(TokenType.ILLEGAL, '¡'),
+        Token(TokenType.ILLEGAL, '¿'),
+        Token(TokenType.ILLEGAL, '@')
     ]
 
     self.assertEquals(tokens, expected_tokens)
@@ -31,8 +32,8 @@ class LexerTest(TestCase):
       tokens.append(lexer.next_token())
 
     expected_tokens: List[Token] = [
-      Token(TokenType.ASSIGN, '='),
-      Token(TokenType.PLUS, '+')
+        Token(TokenType.ASSIGN, '='),
+        Token(TokenType.PLUS, '+')
     ]
 
     self.assertEquals(tokens, expected_tokens)
@@ -43,10 +44,10 @@ class LexerTest(TestCase):
     tokens: List[Token] = []
     for i in range(len(source) + 1):
       tokens.append(lexer.next_token())
-    
+
     expected_tokens: List[Token] = [
-      Token(TokenType.PLUS, '+'),
-      Token(TokenType.EOF, '')
+        Token(TokenType.PLUS, '+'),
+        Token(TokenType.EOF, '')
     ]
 
     self.assertEquals(tokens, expected_tokens)
@@ -68,4 +69,38 @@ class LexerTest(TestCase):
         Token(TokenType.SEMICOLON, ';'),
     ]
 
+    self.assertEquals(tokens, expected_tokens)
+
+  def test_assignment(self) -> None:
+    source: str = 'let cinco = 5;'
+    lexer: Lexer = Lexer(source)
+
+    tokens: List[Token] = []
+    for i in range(5):
+        tokens.append(lexer.next_token())
+
+    expected_tokens: List[Token] = [
+        Token(TokenType.LET, 'let'),
+        Token(TokenType.IDENT, 'cinco'),
+        Token(TokenType.ASSIGN, '='),
+        Token(TokenType.INT, '5'),
+        Token(TokenType.SEMICOLON, ';'),
+    ]
+    self.assertEquals(tokens, expected_tokens)
+
+  def test_assignment_str(self) -> None:
+    source: str = 'let str_cinco = \'cinco\';'
+    lexer: Lexer = Lexer(source)
+
+    tokens: List[Token] = []
+    for i in range(5):
+        tokens.append(lexer.next_token())
+
+    expected_tokens: List[Token] = [
+        Token(TokenType.LET, 'let'),
+        Token(TokenType.IDENT, 'str_cinco'),
+        Token(TokenType.ASSIGN, '='),
+        Token(TokenType.STR, '\'cinco\''),
+        Token(TokenType.SEMICOLON, ';'),
+    ]
     self.assertEquals(tokens, expected_tokens)
