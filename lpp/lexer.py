@@ -1,4 +1,7 @@
+from re import match
+
 from lpp.token import Token, TokenType
+from lpp.utils.const import TOKENS
 
 
 class Lexer:
@@ -11,7 +14,10 @@ class Lexer:
     self._read_character()
 
   def next_token(self) -> Token:
-    token = Token(TokenType.ILLEGAL, self._character)
+    if self._character in TOKENS:
+      token = Token(TOKENS[self._character], self._character)   
+    else:
+      token = Token(TokenType.ILLEGAL, self._character)
     self._read_character()
     return token
 

@@ -9,8 +9,8 @@ from typing import NamedTuple
 @unique
 class TokenType(Enum):
   ASSIGN = auto()
-  COMPA = auto()
-  EDF = auto()
+  COMMA = auto()
+  EOF = auto()
   FUNCTION = auto()
   IDENT = auto()
   ILLEGAL = auto()
