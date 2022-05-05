@@ -16,6 +16,9 @@ class Lexer:
     self._position: int = 0
     self._read_character()
 
+  def _is_initial_token(self, character: str) -> bool:
+    return bool(match(r'^[=<>!+-]$', character))
+
   def _is_letter(self, character: str) -> bool:
     return bool(match(r'^[a-záéíóúA-ZÁÉÍÓÚ0-9\_]$', character))
 
@@ -28,9 +31,20 @@ class Lexer:
   def _is_str(self, character: str) -> bool:
     return bool(match(r'^\'$', character))
 
+  def _next_charaacter(self) -> str:
+    if self._read_position >= len(self._source):
+      return ''
+    else:
+      return self._source[self._read_position]
+
   def next_token(self) -> Token:
     self._skip_whitespaces()
     try:
+      if self._is_initial_token(self._character):
+        character_token = f'{self._character}{self._next_charaacter()}'
+        if len(character_token) == 2 and character_token in TOKENS:
+          self._read_character()
+          self._character = character_token
       if self._character in TOKENS:
         token = Token(TOKENS[self._character], self._character)
       elif self._is_letter_initial(self._character):
@@ -52,10 +66,7 @@ class Lexer:
       return Token(TokenType.ILLEGAL, value)
 
   def _read_character(self) -> None:
-    if self._read_position >= len(self._source):
-      self._character = ''
-    else:
-      self._character = self._source[self._read_position]
+    self._character = self._next_charaacter()
 
     self._position = self._read_position
     self._read_position += 1
