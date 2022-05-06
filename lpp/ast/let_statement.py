@@ -15,4 +15,4 @@ class LetStatement(Statement):
     self.value = value
 
   def __str__(self) -> str:
-    return f'{super().token_literal()} {str(self.name)} = {str(self.value)}'
+    return f'{super().token_literal()} {str(self.name)} = {str(self.value)};'

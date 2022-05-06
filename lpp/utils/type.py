@@ -1,4 +1,4 @@
-from enum import Enum, auto, unique
+from enum import Enum, IntEnum, auto, unique
 
 
 @unique
@@ -40,3 +40,13 @@ class TokenType(Enum):
   SEMICOLON = auto()
   STR = auto()
   TRUE = auto()
+
+
+class Precedence(IntEnum):
+  LOWEST = 1
+  EQUALS = 2
+  LESSGREATER = 3
+  SUM = 4
+  PRODUCT = 5
+  PREFIX = 6
+  CALL = 7
