@@ -72,11 +72,14 @@ class LexerTest(TestCase):
     self.assertEquals(tokens, expected_tokens)
 
   def test_assignment(self) -> None:
-    source: str = 'let five = 5;'
+    source: str = '''
+      let five = 5;
+      let decimal_number = 4.5;
+    '''
     lexer: Lexer = Lexer(source)
 
     tokens: List[Token] = []
-    for i in range(5):
+    for i in range(10):
         tokens.append(lexer.next_token())
 
     expected_tokens: List[Token] = [
@@ -84,6 +87,11 @@ class LexerTest(TestCase):
         Token(TokenType.IDENT, 'five'),
         Token(TokenType.ASSIGN, '='),
         Token(TokenType.INT, '5'),
+        Token(TokenType.SEMICOLON, ';'),
+        Token(TokenType.LET, 'let'),
+        Token(TokenType.IDENT, 'decimal_number'),
+        Token(TokenType.ASSIGN, '='),
+        Token(TokenType.FLOAT, '4.5'),
         Token(TokenType.SEMICOLON, ';'),
     ]
     self.assertEquals(tokens, expected_tokens)

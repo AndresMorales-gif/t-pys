@@ -1,6 +1,6 @@
 from typing import Dict
 
-from lpp.utils.type import TokenType
+from lpp.utils.type import Precedence, TokenType
 
 
 TOKENS: Dict[str, TokenType] = {
@@ -35,5 +35,23 @@ KEIWORDS: Dict[str, TokenType] = {
     'let': TokenType.LET,
     'mod': TokenType.MOD,
     'return': TokenType.RETURN,
-    'true': TokenType.TRUE
+    'true': TokenType.TRUE,
+    'not': TokenType.NEGATION,
+    'and': TokenType.AND,
+    'or': TokenType.OR,
+}
+
+
+PRECEDENCES: Dict[TokenType, Precedence] = {
+    TokenType.EQUALS: Precedence.EQUALS,
+    TokenType.DIFF: Precedence.EQUALS,
+    TokenType.LT: Precedence.LESSGREATER,
+    TokenType.LT_OR_EQUALS: Precedence.LESSGREATER,
+    TokenType.GT: Precedence.LESSGREATER,
+    TokenType.GT_OR_EQUALS: Precedence.LESSGREATER,
+    TokenType.PLUS: Precedence.SUM,
+    TokenType.MINUS: Precedence.SUM,
+    TokenType.DIVISION: Precedence.PRODUCT,
+    TokenType.MULTIPLICATION: Precedence.PRODUCT,
+    TokenType.POWER: Precedence.POWER,
 }

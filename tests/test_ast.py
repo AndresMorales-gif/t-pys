@@ -1,4 +1,6 @@
 from unittest import TestCase
+from lpp.ast.expressions_statement import ExpressionStatement
+from lpp.ast.number import Integer
 
 from lpp.token import Token
 from lpp.ast.program import Program
@@ -34,11 +36,27 @@ class ASTTest(TestCase):
     source: str = 'return 5;'
     program: Program = Program(statements=[
         ReturnStatement(
-          token=Token(TokenType.RETURN, literal='return'),
-          return_value=Identifier(
-            token=Token(TokenType.INT, literal='5'),
-            value='5'
-          )
+            token=Token(TokenType.RETURN, literal='return'),
+            return_value=Identifier(
+                token=Token(TokenType.INT, literal='5'),
+                value='5'
+            )
+        )
+    ])
+
+    program_str = str(program)
+
+    self.assertEqual(program_str, source)
+
+  def test_integer_statement(self) -> None:
+    source: str = '5;'
+    program: Program = Program(statements=[
+        ExpressionStatement(
+            token=Token(TokenType.RETURN, literal='return'),
+            expression=Integer(
+                token=Token(TokenType.INT, literal='5'),
+                value=5
+            )
         )
     ])
 

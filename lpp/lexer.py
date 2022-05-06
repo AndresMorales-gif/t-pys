@@ -86,7 +86,7 @@ class Lexer:
 
     while self._is_number(self._character):
       self._read_character()
-      if match(r'^,$', self._character):
+      if match(r'^\.$', self._character):
         if is_float:
           is_error = True
         self._read_character()

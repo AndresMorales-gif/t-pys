@@ -48,5 +48,6 @@ class Precedence(IntEnum):
   LESSGREATER = 3
   SUM = 4
   PRODUCT = 5
-  PREFIX = 6
-  CALL = 7
+  POWER = 6
+  PREFIX = 7
+  CALL = 8
