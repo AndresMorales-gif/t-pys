@@ -28,17 +28,17 @@ TOKENS: Dict[str, TokenType] = {
 }
 
 KEIWORDS: Dict[str, TokenType] = {
+    'and': TokenType.AND,
     'def': TokenType.FUNCTION,
     'else': TokenType.ELSE,
     'false': TokenType.FALSE,
     'if': TokenType.IF,
     'let': TokenType.LET,
     'mod': TokenType.MOD,
+    'not': TokenType.NEGATION,
+    'or': TokenType.OR,
     'return': TokenType.RETURN,
     'true': TokenType.TRUE,
-    'not': TokenType.NEGATION,
-    'and': TokenType.AND,
-    'or': TokenType.OR,
 }
 
 

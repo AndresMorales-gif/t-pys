@@ -49,7 +49,7 @@ class ASTTest(TestCase):
     self.assertEqual(program_str, source)
 
   def test_integer_statement(self) -> None:
-    source: str = '5;'
+    source: str = '5'
     program: Program = Program(statements=[
         ExpressionStatement(
             token=Token(TokenType.RETURN, literal='return'),

@@ -2,6 +2,7 @@ from typing import Optional
 
 from lpp.token import Token
 from lpp.ast.node_base import Expression
+from lpp.utils.type import TokenType
 
 
 class Prefix(Expression):
@@ -12,4 +13,5 @@ class Prefix(Expression):
     self.right = right
 
   def __str__(self) -> str:
-    return f'{self.operator}{str(self.right)}'
+    space = '' if self.token.token_type != TokenType.NEGATION else ' '
+    return f'({self.operator}{space}{str(self.right)})'

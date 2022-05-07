@@ -10,4 +10,4 @@ class ExpressionStatement(Statement):
     self.expression = expression
 
   def __str__(self) -> str:
-    return f'{str(self.expression)};'
+    return str(self.expression)

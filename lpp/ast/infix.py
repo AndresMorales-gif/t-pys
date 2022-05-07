@@ -16,4 +16,4 @@ class Infix(Expression):
     self.right = right
 
   def __str__(self) -> str:
-    return f'{str(self.left)} {self.operator} {str(self.right)}'
+    return f'({str(self.left)} {self.operator} {str(self.right)})'
