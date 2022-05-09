@@ -1,4 +1,3 @@
-from ast import arguments
 from typing import Callable, Dict, List, Optional
 
 from lpp.utils.type import (
@@ -15,8 +14,8 @@ from lpp.ast.prefix import Prefix
 from lpp.ast.program import Program
 from lpp.ast.if_expression import If
 from lpp.ast.function import Function
-from lpp.ast.number import Float, Integer
 from lpp.utils.const import PRECEDENCES
+from lpp.ast.number import Float, Integer
 from lpp.ast.indentifier import Identifier
 from lpp.ast.let_statement import LetStatement
 from lpp.ast.node_base import Statement, Expression
@@ -104,7 +103,7 @@ class Parser:
     if self._peek_token.token_type == TokenType.RPAREN:
       self._advance_token()
       return arguments
-    
+
     self._advance_token()
     if expression := self._parse_expression(Precedence.LOWEST):
       arguments.append(expression)
@@ -118,7 +117,7 @@ class Parser:
 
     if not self._expected_token(TokenType.RPAREN):
       return []
-    
+
     return arguments
 
   def _parse_expression(self, precedence: Precedence) -> Optional[Expression]:
@@ -285,8 +284,12 @@ class Parser:
     if not self._expected_token(TokenType.ASSIGN):
       return None
 
-    # TODO finished parser expressions
-    while self._current_token.token_type != TokenType.SEMICOLON:
+    self._advance_token()
+
+    let_statement.value = self._parse_expression(Precedence.LOWEST)
+
+    assert self._peek_token is not None
+    if self._peek_token.token_type == TokenType.SEMICOLON:
       self._advance_token()
 
     return let_statement
@@ -308,10 +311,11 @@ class Parser:
 
     self._advance_token()
 
-    # TODO finished parser expressions
-    while self._current_token.token_type != TokenType.SEMICOLON:
-      self._advance_token()
+    return_statement.return_value = self._parse_expression(Precedence.LOWEST)
 
+    assert self._peek_token is not None
+    if self._peek_token.token_type == TokenType.SEMICOLON:
+      self._advance_token()
     return return_statement
 
   def parse_program(self) -> Program:

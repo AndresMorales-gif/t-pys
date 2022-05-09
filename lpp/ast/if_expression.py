@@ -6,8 +6,8 @@ from lpp.ast.node_base import Expression
 
 
 class If(Expression):
-  
-  def __init__(self, 
+
+  def __init__(self,
                token: Token,
                condition: Optional[Expression] = None,
                consequence: Optional[Block] = None,

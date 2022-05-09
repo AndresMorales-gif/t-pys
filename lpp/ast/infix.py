@@ -5,11 +5,11 @@ from lpp.ast.node_base import Expression
 
 
 class Infix(Expression):
-  
-  def __init__(self, token: Token, 
-              left: Expression, 
-              operator: str, 
-              right: Optional[Expression] = None) -> None:
+
+  def __init__(self, token: Token,
+               left: Expression,
+               operator: str,
+               right: Optional[Expression] = None) -> None:
     super().__init__(token)
     self.left = left
     self.operator = operator

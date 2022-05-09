@@ -5,8 +5,8 @@ from lpp.ast.node_base import Statement
 
 
 class Block(Statement):
-  
-  def __init__(self, 
+
+  def __init__(self,
                token: Token,
                statements: List[Statement]) -> None:
     super().__init__(token)

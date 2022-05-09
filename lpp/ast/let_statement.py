@@ -1,7 +1,8 @@
 from typing import Optional
+
+from lpp.token import Token
 from lpp.ast.indentifier import Identifier
 from lpp.ast.node_base import Expression, Statement
-from lpp.token import Token
 
 
 class LetStatement(Statement):

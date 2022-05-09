@@ -102,18 +102,49 @@ class ParserTest(TestCase):
       let x = 5;
       let y = 10;
       let foo = 20;
+      let bar = true;
     '''
     lexer: Lexer = Lexer(source)
     parser: Parser = Parser(lexer)
 
     program: Program = parser.parse_program()
 
-    self.assertEqual(len(program.statements), 3)
+    self.assertEqual(len(program.statements), 4)
+
+    expected_identifiers_and_values: List[Tuple[str, Any]] = [
+        ('x', 5),
+        ('y', 10),
+        ('foo', 20),
+        ('bar', True),
+    ]
+
+    for statement, (expected_identifier, expected_value) in zip(
+            program.statements, expected_identifiers_and_values):
+      self.assertEqual(statement.token_literal(), 'let')
+      self.assertIsInstance(statement, LetStatement)
+
+      let_statement = cast(LetStatement, statement)
+
+      assert let_statement.name is not None
+      self._test_identifier(let_statement.name, expected_identifier)
+
+      assert let_statement.value is not None
+      self._test_literal_expression(let_statement.value, expected_value)
+
+  def test_names_in_let_statements(self) -> None:
+    source: str = '''
+      let x = 5;
+      let y = 10;
+      let foo = 20;
+    '''
+    lexer: Lexer = Lexer(source)
+    parser: Parser = Parser(lexer)
+
+    program: Program = parser.parse_program()
 
     names: List[str] = []
     for statement in program.statements:
-      self.assertEqual(statement.token_literal(), 'let')
-      self.assertIsInstance(statement, LetStatement)
+      statement = cast(LetStatement, statement)
       assert statement.name is not None
       names.append(statement.name.value)
 
@@ -134,17 +165,33 @@ class ParserTest(TestCase):
     source: str = '''
       return 5;
       return foo;
+      return true;
+      return false;
     '''
     lexer: Lexer = Lexer(source)
     parser: Parser = Parser(lexer)
 
     program: Program = parser.parse_program()
 
-    self.assertEqual(len(program.statements), 2)
+    self.assertEquals(len(program.statements), 4)
 
-    for statement in program.statements:
-      self.assertEqual(statement.token_literal(), 'return')
+    expected_return_values: List[Any] = [
+        5,
+        'foo',
+        True,
+        False,
+    ]
+
+    for statement, expected_return_value in zip(
+            program.statements, expected_return_values):
+      self.assertEquals(statement.token_literal(), 'return')
       self.assertIsInstance(statement, ReturnStatement)
+
+      return_statement = cast(ReturnStatement, statement)
+
+      assert return_statement.return_value is not None
+      self._test_literal_expression(return_statement.return_value,
+                                    expected_return_value)
 
   def test_identifier_expression(self) -> None:
     source: str = 'foobar;'
@@ -397,9 +444,9 @@ class ParserTest(TestCase):
     source: str = 'def(x, y { x + y; };'
     lexer: Lexer = Lexer(source)
     parser: Parser = Parser(lexer)
-    
+
     program: Program = parser.parse_program()
-    
+
     self.assertEquals(len(parser.errors), 1)
 
   def test_call_expression(self) -> None:
@@ -409,9 +456,9 @@ class ParserTest(TestCase):
 
     program: Program = parser.parse_program()
     self._test_program_statement(parser, program)
-    
-    call = cast(Call, cast(ExpressionStatement, 
-                            program.statements[0]).expression)
+
+    call = cast(Call, cast(ExpressionStatement,
+                           program.statements[0]).expression)
 
     self.assertIsInstance(call, Call)
     self._test_identifier(call.function, 'sum')

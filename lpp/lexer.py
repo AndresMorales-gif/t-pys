@@ -1,10 +1,9 @@
-from ctypes.wintypes import FLOAT
 from re import match
 from typing import Dict
 
-from lpp.token import Token, lookup_token_type
 from lpp.utils.const import TOKENS
 from lpp.utils.type import TokenType
+from lpp.token import Token, lookup_token_type
 
 
 class Lexer:

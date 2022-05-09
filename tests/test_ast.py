@@ -1,13 +1,13 @@
 from unittest import TestCase
-from lpp.ast.expressions_statement import ExpressionStatement
-from lpp.ast.number import Integer
 
 from lpp.token import Token
+from lpp.ast.number import Integer
 from lpp.ast.program import Program
 from lpp.utils.type import TokenType
+from lpp.ast.indentifier import Identifier
 from lpp.ast.let_statement import LetStatement
 from lpp.ast.return_statement import ReturnStatement
-from lpp.ast.indentifier import Identifier
+from lpp.ast.expressions_statement import ExpressionStatement
 
 
 class ASTTest(TestCase):

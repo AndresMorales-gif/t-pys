@@ -1,11 +1,11 @@
 from typing import Optional
 
-from lpp.ast.node_base import Expression, Statement
 from lpp.token import Token
+from lpp.ast.node_base import Expression, Statement
 
 
 class ReturnStatement(Statement):
-  
+
   def __init__(self,
                token: Token,
                return_value: Optional[Expression] = None) -> None:

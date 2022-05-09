@@ -1,5 +1,5 @@
-from lpp.ast.node_base import Expression
 from lpp.token import Token
+from lpp.ast.node_base import Expression
 
 
 class Identifier(Expression):

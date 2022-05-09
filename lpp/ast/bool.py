@@ -1,5 +1,6 @@
-from contextvars import Token
 from typing import Optional
+
+from lpp.token import Token
 from lpp.ast.node_base import Expression
 
 
