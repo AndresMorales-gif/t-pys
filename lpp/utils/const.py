@@ -54,4 +54,5 @@ PRECEDENCES: Dict[TokenType, Precedence] = {
     TokenType.DIVISION: Precedence.PRODUCT,
     TokenType.MULTIPLICATION: Precedence.PRODUCT,
     TokenType.POWER: Precedence.POWER,
+    TokenType.LPAREN: Precedence.CALL,
 }

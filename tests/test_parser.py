@@ -2,6 +2,7 @@ from unittest import TestCase
 from typing import Any, List, Tuple, Type, cast
 
 from lpp.lexer import Lexer
+from lpp.ast.call import Call
 from lpp.parser import Parser
 from lpp.ast.block import Block
 from lpp.ast.infix import Infix
@@ -9,6 +10,7 @@ from lpp.ast.bool import Boolean
 from lpp.ast.prefix import Prefix
 from lpp.ast.program import Program
 from lpp.ast.if_expression import If
+from lpp.ast.function import Function
 from lpp.ast.node_base import Expression
 from lpp.ast.number import Float, Integer
 from lpp.ast.indentifier import Identifier
@@ -33,7 +35,8 @@ class ParserTest(TestCase):
     self.assertIsInstance(expression, Boolean)
     boolean = cast(Boolean, expression)
     self.assertEquals(boolean.value, expected_value)
-    self.assertEquals(boolean.token.literal, 'true' if expected_value else 'false')
+    self.assertEquals(boolean.token.literal,
+                      'true' if expected_value else 'false')
 
   def _test_literal_expression(self,
                                expression: Expression,
@@ -80,7 +83,7 @@ class ParserTest(TestCase):
     self._test_literal_expression(infix.left, expected_left)
 
     self.assertEquals(infix.operator, expected_operator)
-    
+
     assert infix.right is not None
     self._test_literal_expression(infix.right, expected_right)
 
@@ -183,7 +186,7 @@ class ParserTest(TestCase):
     self._test_program_statement(parser, program, 3)
 
     for statement, (expected_operator, expected_value) in zip(
-              program.statements, [('not', 5), ('-', 15), ('not', True)]):
+            program.statements, [('not', 5), ('-', 15), ('not', True)]):
       statement = cast(ExpressionStatement, statement)
       self.assertIsInstance(statement.expression, Prefix)
 
@@ -213,29 +216,29 @@ class ParserTest(TestCase):
     self._test_program_statement(parser, program, 10)
 
     expected_operators_and_values: List[Tuple[Any, str, Any]] = [
-      (5, '+', 5),
-      (5, '-', 5),
-      (5, '*', 5),
-      (5, '/', 5),
-      (5, '>', 5),
-      (5, '<', 5),
-      (5, '==', 5),
-      (5, '!=', 5),
-      (True, '!=', False),
-      (True, '==', True),
-    ] 
+        (5, '+', 5),
+        (5, '-', 5),
+        (5, '*', 5),
+        (5, '/', 5),
+        (5, '>', 5),
+        (5, '<', 5),
+        (5, '==', 5),
+        (5, '!=', 5),
+        (True, '!=', False),
+        (True, '==', True),
+    ]
 
     for statement, (expected_left, expected_operator, expected_right) in zip(
-              program.statements, expected_operators_and_values):
+            program.statements, expected_operators_and_values):
       statement = cast(ExpressionStatement, statement)
       assert statement.expression is not None
       self.assertIsInstance(statement.expression, Infix)
-      
+
       self._test_infix_expression(
-        statement.expression,
-        expected_left,
-        expected_operator,
-        expected_right
+          statement.expression,
+          expected_left,
+          expected_operator,
+          expected_right
       )
 
   def test_boolean_expression(self) -> None:
@@ -251,26 +254,30 @@ class ParserTest(TestCase):
     for statement, expected_value in zip(program.statements, expected_values):
       expression_statement = cast(ExpressionStatement, statement)
       assert expression_statement.expression is not None
-      self._test_literal_expression(expression_statement.expression, expected_value)
+      self._test_literal_expression(
+          expression_statement.expression, expected_value)
 
   def test_operator_precedent(self) -> None:
     test_sources: List[Tuple[str, str, int]] = [
-      ('-a * b;', '((-a) * b)', 1),
-      ('not -a', '(not (-a))', 1),
-      ('a + b / c', '(a + (b / c))', 1),
-      ('3 + 4; -5 * 5;', '(3 + 4)((-5) * 5)', 2),
-      ('3 + 4 + 3 + 8 + 5;', '((((3 + 4) + 3) + 8) + 5)', 1),
-      ('a * b + c;', '((a * b) + c)', 1),
-      ('3 > 4 == false;', '((3 > 4) == false)', 1),
-      ('3 < 4 != true;', '((3 < 4) != true)', 1),
-      ('not a == b;', '((not a) == b)', 1),
-      ('not a != not b; a * 8 - 5;', '((not a) != (not b))((a * 8) - 5)', 2),
-      ('1 + (2 + 3) + 4;', '((1 + (2 + 3)) + 4)', 1),
-      ('(a + b) * c;', '((a + b) * c)', 1),
-      ('-(5 + 5);', '(-(5 + 5))', 1),
-      ('not (5 < 2) == not (5 < 3 == 5 > 8);', '((not (5 < 2)) == (not ((5 < 3) == (5 > 8))))', 1),
+        ('-a * b;', '((-a) * b)', 1),
+        ('not -a', '(not (-a))', 1),
+        ('a + b / c', '(a + (b / c))', 1),
+        ('3 + 4; -5 * 5;', '(3 + 4)((-5) * 5)', 2),
+        ('3 + 4 + 3 + 8 + 5;', '((((3 + 4) + 3) + 8) + 5)', 1),
+        ('a * b + c;', '((a * b) + c)', 1),
+        ('3 > 4 == false;', '((3 > 4) == false)', 1),
+        ('3 < 4 != true;', '((3 < 4) != true)', 1),
+        ('not a == b;', '((not a) == b)', 1),
+        ('not a != not b; a * 8 - 5;', '((not a) != (not b))((a * 8) - 5)', 2),
+        ('1 + (2 + 3) + 4;', '((1 + (2 + 3)) + 4)', 1),
+        ('(a + b) * c;', '((a + b) * c)', 1),
+        ('-(5 + 5);', '(-(5 + 5))', 1),
+        ('not (5 < 2) == not (5 < 3 == 5 > 8);',
+            '((not (5 < 2)) == (not ((5 < 3) == (5 > 8))))', 1),
+        ('sum(a, b, 1, 2 * 3, 4 + 5, sum(6, 7 * 8));',
+            'sum(a, b, 1, (2 * 3), (4 + 5), sum(6, (7 * 8)))', 1)
     ]
-    
+
     for source, expected_result, expected_statement_count in test_sources:
       lexer: Lexer = Lexer(source)
       parser: Parser = Parser(lexer)
@@ -288,7 +295,8 @@ class ParserTest(TestCase):
 
     self._test_program_statement(parser, program)
 
-    if_expression = cast(If, cast(ExpressionStatement, program.statements[0]).expression)
+    if_expression = cast(
+        If, cast(ExpressionStatement, program.statements[0]).expression)
     self.assertIsInstance(if_expression, If)
     assert if_expression.condition is not None
     self._test_infix_expression(if_expression.condition, 'x', '<', 'y')
@@ -313,7 +321,8 @@ class ParserTest(TestCase):
 
     self._test_program_statement(parser, program)
 
-    if_expression = cast(If, cast(ExpressionStatement, program.statements[0]).expression)
+    if_expression = cast(
+        If, cast(ExpressionStatement, program.statements[0]).expression)
     self.assertIsInstance(if_expression, If)
     assert if_expression.condition is not None
     self._test_infix_expression(if_expression.condition, 'x', '<', 'y')
@@ -335,3 +344,80 @@ class ParserTest(TestCase):
                                  if_expression.alternative.statements[0])
     assert alternative_statement.expression is not None
     self._test_identifier(alternative_statement.expression, 'y')
+
+  def test_function_literal(self) -> None:
+    source: str = 'def(x, y) { x + y; };'
+    lexer: Lexer = Lexer(source)
+    parser: Parser = Parser(lexer)
+    program: Program = parser.parse_program()
+
+    self._test_program_statement(parser, program)
+
+    function_literal = cast(Function,
+                            cast(ExpressionStatement, program.statements[0]).expression)
+    self.assertIsInstance(function_literal, Function)
+
+    self.assertEquals(len(function_literal.parameters), 2)
+    self._test_literal_expression(function_literal.parameters[0], 'x')
+    self._test_literal_expression(function_literal.parameters[1], 'y')
+
+    assert function_literal.body is not None
+    self.assertEquals(len(function_literal.body.statements), 1)
+    body = cast(ExpressionStatement, function_literal.body.statements[0])
+    assert body.expression is not None
+    self._test_infix_expression(body.expression, 'x', '+', 'y')
+
+  def test_function_parameters(self) -> None:
+    tests = [
+        {
+            'input': 'def() {};',
+            'expected_params': [],
+        },
+        {
+            'input': 'def(x) {};',
+            'expected_params': ['x'],
+        },
+        {
+            'input': 'def(x, y, z) {};',
+            'expected_params': ['x', 'y', 'z'],
+        }
+    ]
+    for test in tests:
+      lexer: Lexer = Lexer(test['input'])
+      parser: Parser = Parser(lexer)
+      program: Program = parser.parse_program()
+
+      function = cast(Function, cast(ExpressionStatement,
+                                     program.statements[0]).expression)
+      self.assertEquals(len(function.parameters), len(test['expected_params']))
+      for idx, param in enumerate(test['expected_params']):
+        self._test_literal_expression(function.parameters[idx], param)
+
+  def test_function_error(self) -> None:
+    source: str = 'def(x, y { x + y; };'
+    lexer: Lexer = Lexer(source)
+    parser: Parser = Parser(lexer)
+    
+    program: Program = parser.parse_program()
+    
+    self.assertEquals(len(parser.errors), 1)
+
+  def test_call_expression(self) -> None:
+    source: str = 'sum(1, 2 * 3, 4 + 5);'
+    lexer: Lexer = Lexer(source)
+    parser: Parser = Parser(lexer)
+
+    program: Program = parser.parse_program()
+    self._test_program_statement(parser, program)
+    
+    call = cast(Call, cast(ExpressionStatement, 
+                            program.statements[0]).expression)
+
+    self.assertIsInstance(call, Call)
+    self._test_identifier(call.function, 'sum')
+
+    assert call.arguments is not None
+    self.assertEquals(len(call.arguments), 3)
+    self._test_literal_expression(call.arguments[0], 1)
+    self._test_infix_expression(call.arguments[1], 2, '*', 3)
+    self._test_infix_expression(call.arguments[2], 4, '+', 5)
