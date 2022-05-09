@@ -1,9 +1,4 @@
 from typing import Callable, Dict, List, Optional
-from lpp.ast.bool import Boolean
-from lpp.ast.infix import Infix
-from lpp.ast.number import Float, Integer
-from lpp.ast.prefix import Prefix
-from lpp.utils.const import PRECEDENCES
 
 from lpp.utils.type import (
     Precedence,
@@ -11,7 +6,14 @@ from lpp.utils.type import (
 )
 from lpp.lexer import Lexer
 from lpp.token import Token
+from lpp.ast.block import Block
+from lpp.ast.infix import Infix
+from lpp.ast.bool import Boolean
+from lpp.ast.prefix import Prefix
 from lpp.ast.program import Program
+from lpp.ast.if_expression import If
+from lpp.ast.number import Float, Integer
+from lpp.utils.const import PRECEDENCES
 from lpp.ast.indentifier import Identifier
 from lpp.ast.let_statement import LetStatement
 from lpp.ast.node_base import Statement, Expression
@@ -65,6 +67,20 @@ class Parser:
     assert self._peek_token is not None
     self.errors.append(
         f'expected {token_type} but got {self._peek_token.token_type}')
+
+  def _parse_block(self) -> Block:
+    assert self._current_token is not None
+    block_statement = Block(token=self._current_token, statements=[])
+    self._advance_token()
+
+    while not self._current_token.token_type == TokenType.RBRACE \
+            and not self._current_token.token_type == TokenType.EOF:
+      statement = self._parse_statement()
+      if statement:
+        block_statement.statements.append(statement)
+      self._advance_token()
+    
+    return block_statement
 
   def _parser_boolean(self) -> Boolean:
     assert self._current_token is not None
@@ -142,6 +158,33 @@ class Parser:
         token=self._current_token,
         value=self._current_token.literal
     )
+
+  def _parse_if_expression(self) -> Optional[If]:
+    assert self._current_token is not None
+    if_expression = If(token=self._current_token)
+
+    if not self._expected_token(TokenType.LPAREN):
+      return None
+    
+    self._advance_token()
+    if_expression.condition = self._parse_expression(Precedence.LOWEST)
+
+    if not self._expected_token(TokenType.RPAREN):
+      return None
+    
+    if not self._expected_token(TokenType.LBRACE):
+      return None
+    
+    if_expression.consequence = self._parse_block()
+    
+    if self._peek_token.token_type == TokenType.ELSE:
+      self._advance_token()
+           
+      if not self._expected_token(TokenType.LBRACE):
+        return None
+      
+      if_expression.alternative = self._parse_block()
+    return if_expression
 
   def _parse_infix_expression(self, left: Expression) -> Infix:
     assert self._current_token is not None
@@ -249,4 +292,5 @@ class Parser:
         TokenType.FLOAT: self._parser_float,
         TokenType.NEGATION: self._parse_prefix_expression,
         TokenType.MINUS: self._parse_prefix_expression,
+        TokenType.IF: self._parse_if_expression,
     }

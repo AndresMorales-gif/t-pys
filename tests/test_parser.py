@@ -3,10 +3,12 @@ from typing import Any, List, Tuple, Type, cast
 
 from lpp.lexer import Lexer
 from lpp.parser import Parser
+from lpp.ast.block import Block
 from lpp.ast.infix import Infix
 from lpp.ast.bool import Boolean
 from lpp.ast.prefix import Prefix
 from lpp.ast.program import Program
+from lpp.ast.if_expression import If
 from lpp.ast.node_base import Expression
 from lpp.ast.number import Float, Integer
 from lpp.ast.indentifier import Identifier
@@ -276,3 +278,60 @@ class ParserTest(TestCase):
       program: Program = parser.parse_program()
       self._test_program_statement(parser, program, expected_statement_count)
       self.assertEquals(str(program), expected_result)
+
+  def test_if_expressions(self) -> None:
+    source: str = 'if (x < y) { z }'
+    lexer: Lexer = Lexer(source)
+    parser: Parser = Parser(lexer)
+
+    program: Program = parser.parse_program()
+
+    self._test_program_statement(parser, program)
+
+    if_expression = cast(If, cast(ExpressionStatement, program.statements[0]).expression)
+    self.assertIsInstance(if_expression, If)
+    assert if_expression.condition is not None
+    self._test_infix_expression(if_expression.condition, 'x', '<', 'y')
+
+    assert if_expression.consequence is not None
+    self.assertIsInstance(if_expression.consequence, Block)
+    self.assertEquals(len(if_expression.consequence.statements), 1)
+
+    consequence_statement = cast(ExpressionStatement,
+                                 if_expression.consequence.statements[0])
+    assert consequence_statement.expression is not None
+    self._test_identifier(consequence_statement.expression, 'z')
+
+    self.assertIsNone(if_expression.alternative)
+
+  def test_if_expressions_alternative(self) -> None:
+    source: str = 'if (x < y) { z } else { y }'
+    lexer: Lexer = Lexer(source)
+    parser: Parser = Parser(lexer)
+
+    program: Program = parser.parse_program()
+
+    self._test_program_statement(parser, program)
+
+    if_expression = cast(If, cast(ExpressionStatement, program.statements[0]).expression)
+    self.assertIsInstance(if_expression, If)
+    assert if_expression.condition is not None
+    self._test_infix_expression(if_expression.condition, 'x', '<', 'y')
+
+    assert if_expression.consequence is not None
+    self.assertIsInstance(if_expression.consequence, Block)
+    self.assertEquals(len(if_expression.consequence.statements), 1)
+
+    consequence_statement = cast(ExpressionStatement,
+                                 if_expression.consequence.statements[0])
+    assert consequence_statement.expression is not None
+    self._test_identifier(consequence_statement.expression, 'z')
+
+    assert if_expression.alternative is not None
+    self.assertIsInstance(if_expression.alternative, Block)
+    self.assertEquals(len(if_expression.alternative.statements), 1)
+
+    alternative_statement = cast(ExpressionStatement,
+                                 if_expression.alternative.statements[0])
+    assert alternative_statement.expression is not None
+    self._test_identifier(alternative_statement.expression, 'y')
