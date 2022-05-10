@@ -44,10 +44,11 @@ class TokenType(Enum):
 
 class Precedence(IntEnum):
   LOWEST = 1
-  EQUALS = 2
-  LESSGREATER = 3
-  SUM = 4
-  PRODUCT = 5
-  POWER = 6
-  PREFIX = 7
-  CALL = 8
+  LOGIC = 2
+  EQUALS = 3
+  LESSGREATER = 4
+  SUM = 5
+  PRODUCT = 6
+  POWER = 7
+  PREFIX = 8
+  CALL = 9

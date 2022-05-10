@@ -362,6 +362,8 @@ class Parser:
         TokenType.LT_OR_EQUALS: self._parse_infix_expression,
         TokenType.GT: self._parse_infix_expression,
         TokenType.GT_OR_EQUALS: self._parse_infix_expression,
+        TokenType.AND: self._parse_infix_expression,
+        TokenType.OR: self._parse_infix_expression,
         TokenType.LPAREN: self._parse_call,
     }
 
