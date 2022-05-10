@@ -9,7 +9,7 @@ class Integer(Object):
     return ObjectType.INTEGER
 
   def inspect(self) -> str:
-    return str(self._value)
+    return str(self.value)
 
 
 class Float(Object):
@@ -20,4 +20,4 @@ class Float(Object):
     return ObjectType.INTEGER
 
   def inspect(self) -> str:
-    return str(self._value)
+    return str(self.value)

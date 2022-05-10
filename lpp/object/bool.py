@@ -9,4 +9,4 @@ class Boolean(Object):
     return ObjectType.BOOLEAN
 
   def inspect(self) -> str:
-    return 'true' if self._value else 'false'
+    return 'true' if self.value else 'false'
