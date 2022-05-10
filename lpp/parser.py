@@ -82,6 +82,10 @@ class Parser:
         block_statement.statements.append(statement)
       self._advance_token()
 
+    if self._current_token.token_type == TokenType.EOF:
+      self.errors.append(
+          f'expected {TokenType.RBRACE} but got {self._current_token.token_type}'
+      )
     return block_statement
 
   def _parse_boolean(self) -> Boolean:
