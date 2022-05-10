@@ -14,7 +14,7 @@ class ObjectType(Enum):
   FLOAT = auto()
   STRING = auto()
   NULL = auto()
-
+  RETURN = auto()
 
 class Object(ABC):
 

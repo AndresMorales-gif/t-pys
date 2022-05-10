@@ -1,11 +1,11 @@
 from unittest import TestCase
-from typing import List, Tuple, cast
+from typing import Any, List, Tuple, cast
 
 from lpp.lexer import Lexer
 from lpp.parser import Parser
-from lpp.evaluator import evaluate
 from lpp.object.bool import Boolean
 from lpp.ast.program import Program
+from lpp.evaluator import NULL, evaluate
 from lpp.object.object_base import Object
 from lpp.object.numbers import Integer, Float
 
@@ -36,6 +36,9 @@ class EvaluatorTest(TestCase):
     self.assertIsInstance(value, Float)
     value = cast(Float, value)
     self.assertEquals(value.value, expected)
+
+  def _test_null_object(self, value: Object) -> None:
+    self.assertEquals(value, NULL)
 
   def test_integer_evaluation(self) -> None:
     tests: List[Tuple[str, int]] = [
@@ -116,3 +119,44 @@ class EvaluatorTest(TestCase):
     for source, expected in tests:
       evaluated = self._evaluate_tests(source)
       self._test_boolean_object(evaluated, expected)
+
+  def test_if_else_evaluation(self) -> None:
+    tests: List[Tuple[str, Any]] = [
+        ('if (true) { 10; }', 10),
+        ('if (false) { 10; }', None),
+        ('if (1) { 10; }', 10),
+        ('if (1 < 2) { 10; }', 10),
+        ('if (1 > 2) { 10; }', None),
+        ('if (0) { 10; } else { 20; }', 20),
+        ('if (0.0) { 10; } else { 20; }', 20),
+        ('if (1 < 2 and 5 < 8) { 10; } else { 20; }', 10),
+        ('if (1 > 2 and 5 < 8) { 10; } else { 20; }', 20),
+        ('if (1 > 2 or 5 < 8) { 10; } else { 20; }', 10),
+    ]
+    for source, expected in tests:
+      evaluated = self._evaluate_tests(source)
+
+      if type(expected) == int:
+        self._test_integer_object(evaluated, expected)
+      else:
+        self._test_null_object(evaluated)
+
+  def test_return_evaluation(self) -> None:
+    tests: List[Tuple[str, Any]] = [
+        ('return 10;', 10),
+        ('return 10; 9;', 10),
+        ('return 2 * 5; 9;', 10),
+        ('9; return 3 * 6; 9;', 18),
+        ('''
+            if (10 > 1) {
+              if (20 > 10) {
+                return 1;
+              }
+              return 0;
+            }
+        ''', 1),
+    ]
+    for source, expected in tests:
+      evaluated = self._evaluate_tests(source)
+      self._test_integer_object(evaluated, expected)
+      

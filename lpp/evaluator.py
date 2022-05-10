@@ -1,16 +1,21 @@
 from typing import List, Optional, Type, cast
 
+from lpp.ast.block import Block
 from lpp.ast.infix import Infix
 from lpp.ast.bool import Boolean
 from lpp.ast.prefix import Prefix
 from lpp.ast.program import Program
+from lpp.ast.if_expression import If
 from lpp.ast.number import Float, Integer
 from lpp.ast.node_base import ASTNode, Statement
+from lpp.ast.return_statement import ReturnStatement
 from lpp.object.object_base import Object, ObjectType
 from lpp.ast.expressions_statement import ExpressionStatement
 
 import lpp.object.null as object_null
 import lpp.object.bool as object_bool
+import lpp.object.string as object_string
+import lpp.object.return_object as object_return
 import lpp.object.numbers as object_numbers
 
 
@@ -25,7 +30,7 @@ def evaluate(node: ASTNode) -> Optional[Object]:
   if node_type == Program:
     node = cast(Program, node)
 
-    return _evaluate_statements(node.statements)
+    return _evaluate_program(node)
   elif node_type == ExpressionStatement:
     node = cast(ExpressionStatement, node)
 
@@ -67,7 +72,61 @@ def evaluate(node: ASTNode) -> Optional[Object]:
     assert right is not None and left is not None
     return _evaluate_infix_expression(node.operator, left, right)
 
+  elif node_type == Block:
+    node = cast(Block, node)
+
+    return _evaluate_block_statements(node)
+  elif node_type == If:
+    node = cast(If, node)
+
+    return _evaluate_if_expression(node)
+
+  elif node_type == ReturnStatement:
+    node = cast(ReturnStatement, node)
+
+    assert node.return_value is not None
+    value = evaluate(node.return_value)
+    
+    assert value is not None
+    return object_return.Return(value)
+
   return None
+
+
+def _evaluate_if_expression(if_expression: If) -> Optional[Object]:
+  assert if_expression is not None
+  condition = evaluate(if_expression.condition)
+
+  assert condition is not None
+  if _is_truthy(condition):
+    assert if_expression.consequence is not None
+    return evaluate(if_expression.consequence)
+  elif if_expression.alternative is not None:
+    return evaluate(if_expression.alternative)
+  else:
+    return NULL
+
+
+def _evaluate_block_statements(block: Block) -> Optional[Object]:
+  result: Optional[Object] = None
+
+  for statement in block.statements:
+    result = evaluate(statement)
+
+    if result is not None and result.type() == ObjectType.RETURN:
+      return result
+
+  return result
+
+def _evaluate_program(program: Program) -> Optional[Object]:
+  result: Optional[Object] = None
+  for statement in program.statements:
+    result = evaluate(statement)
+
+    if type(result) == object_return.Return:
+      result = cast(object_return.Return, result)
+      return result.value
+  return result
 
 
 def _evaluate_statements(statements: List[Statement]) -> Optional[Object]:
@@ -77,6 +136,28 @@ def _evaluate_statements(statements: List[Statement]) -> Optional[Object]:
     result = evaluate(statement)
 
   return result
+
+
+def _is_truthy(obj: Object) -> bool:
+  if obj is NULL:
+    return False
+  if obj is TRUE:
+    return True
+  if obj is FALSE:
+    return False
+  if obj.type() == ObjectType.INTEGER:
+    obj = cast(object_numbers.Integer, obj)
+    if obj.value == 0:
+      return False
+  if obj.type() == ObjectType.FLOAT:
+    obj = cast(object_numbers.Float, obj)
+    if obj.value == 0:
+      return False
+  if obj.type() == ObjectType.STRING:
+    obj = cast(object_string.String, obj)
+    if obj.value == '':
+      return False
+  return True
 
 
 def _to_boolean_object(value: bool) -> object_bool.Boolean:
