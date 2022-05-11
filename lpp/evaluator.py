@@ -1,9 +1,10 @@
-from typing import List, Optional, Type, cast
+from typing import Any, List, Optional, Type, cast
 
 from lpp.ast.block import Block
 from lpp.ast.infix import Infix
 from lpp.ast.bool import Boolean
 from lpp.ast.prefix import Prefix
+from lpp.object.error import Error
 from lpp.ast.program import Program
 from lpp.ast.if_expression import If
 from lpp.ast.number import Float, Integer
@@ -15,13 +16,18 @@ from lpp.ast.expressions_statement import ExpressionStatement
 import lpp.object.null as object_null
 import lpp.object.bool as object_bool
 import lpp.object.string as object_string
-import lpp.object.return_object as object_return
 import lpp.object.numbers as object_numbers
+import lpp.object.return_object as object_return
 
 
 TRUE = object_bool.Boolean(True)
 FALSE = object_bool.Boolean(False)
 NULL = object_null.Null()
+
+
+_TYPE_MISMATCH = 'Type mismatch: {} {} {}'
+_UNKNOW_PREFIX_OPERATION = 'Unknown operator: {}{}'
+_UNKNOW_INFIX_OPERATION = 'Unknown operator: {} {} {}'
 
 
 def evaluate(node: ASTNode) -> Optional[Object]:
@@ -113,7 +119,8 @@ def _evaluate_block_statements(block: Block) -> Optional[Object]:
   for statement in block.statements:
     result = evaluate(statement)
 
-    if result is not None and result.type() == ObjectType.RETURN:
+    if result is not None and (result.type() == ObjectType.RETURN \
+                or result.type() == ObjectType.ERROR):
       return result
 
   return result
@@ -126,6 +133,8 @@ def _evaluate_program(program: Program) -> Optional[Object]:
     if type(result) == object_return.Return:
       result = cast(object_return.Return, result)
       return result.value
+    elif type(result) == Error:
+      return result
   return result
 
 
@@ -181,16 +190,24 @@ def _evaluate_infix_expression(operator: str,
   if left.type() == ObjectType.INTEGER or left.type() == ObjectType.FLOAT:
     if right.type() == ObjectType.INTEGER or right.type() == ObjectType.FLOAT:
       return _evaluate_number_infix_expression(operator, left, right)
-  if operator == '==':
-    return _to_boolean_object(left is right)
-  if operator == '!=':
-    return _to_boolean_object(left is not right)
-  if operator == 'and':
-    return _to_boolean_object(left is TRUE and right is TRUE)
-  if operator == 'or':
-    return _to_boolean_object(left is TRUE or right is TRUE)
+  if left.type() == ObjectType.BOOLEAN and right.type() == ObjectType.BOOLEAN:
+    if operator == '==':
+      return _to_boolean_object(left is right)
+    if operator == '!=':
+      return _to_boolean_object(left is not right)
+    if operator == 'and':
+      return _to_boolean_object(left is TRUE and right is TRUE)
+    if operator == 'or':
+      return _to_boolean_object(left is TRUE or right is TRUE)
 
-  return NULL
+  if left.type() != right.type():
+    return _new_error(_TYPE_MISMATCH, [left.type().name,
+                                              operator,
+                                              right.type().name])
+
+  return _new_error(_UNKNOW_INFIX_OPERATION, [left.type().name,
+                                              operator,
+                                              right.type().name])
 
 
 def _evaluate_minus_operator_expression(right: Object) -> Object:
@@ -200,7 +217,7 @@ def _evaluate_minus_operator_expression(right: Object) -> Object:
   if type(right) == object_numbers.Float:
     right = cast(object_numbers.Float, right)
     return object_numbers.Float(-right.value)
-  return NULL
+  return _new_error(_UNKNOW_PREFIX_OPERATION, ['-', right.type().name])
 
 
 def _evaluate_number_infix_expression(operator: str,
@@ -246,7 +263,9 @@ def _evaluate_number_infix_expression(operator: str,
   if operator == '!=':
     return _to_boolean_object(left_value != right_value)
 
-  return NULL
+  return _new_error(_UNKNOW_INFIX_OPERATION, [left.type().name,
+                                              operator,
+                                              right.type().name])
 
 
 def _evaluate_prefix_expression(operator: str, right: Object) -> Object:
@@ -255,4 +274,8 @@ def _evaluate_prefix_expression(operator: str, right: Object) -> Object:
   elif operator == '-':
     return _evaluate_minus_operator_expression(right)
   else:
-    return NULL
+    return _new_error(_UNKNOW_PREFIX_OPERATION, [operator, right.type().name])
+
+
+def _new_error(message: str, args: List[Any]) -> Error:
+  return Error(message.format(*args))

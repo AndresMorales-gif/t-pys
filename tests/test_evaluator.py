@@ -3,6 +3,7 @@ from typing import Any, List, Tuple, cast
 
 from lpp.lexer import Lexer
 from lpp.parser import Parser
+from lpp.object.error import Error
 from lpp.object.bool import Boolean
 from lpp.ast.program import Program
 from lpp.evaluator import NULL, evaluate
@@ -159,4 +160,39 @@ class EvaluatorTest(TestCase):
     for source, expected in tests:
       evaluated = self._evaluate_tests(source)
       self._test_integer_object(evaluated, expected)
+
+  def test_error_handling(self) -> None:
+    tests: List[Tuple[str, str]] = [
+        ('5 + true;', 'Type mismatch: INTEGER + BOOLEAN'),
+        ('5 + true; 9;', 'Type mismatch: INTEGER + BOOLEAN'),
+        ('-true;', 'Unknown operator: -BOOLEAN'),
+        ('true + false;', 'Unknown operator: BOOLEAN + BOOLEAN'),
+        ('5; true - false; 10;', 'Unknown operator: BOOLEAN - BOOLEAN'),
+        ('''
+          if (10 > 7) {
+            return true + false;
+          }
+        ''', 'Unknown operator: BOOLEAN + BOOLEAN'),
+        ('''
+          if (10 > 1) {
+            if (true) {
+              return true * false;
+            }
+            return 1;
+          }
+        ''', 'Unknown operator: BOOLEAN * BOOLEAN'),
+        ('''
+          if (5 < 2) {
+            return 1;
+          } else {
+            return true / false;
+          }
+        ''', 'Unknown operator: BOOLEAN / BOOLEAN')
+    ]
+    for source, expected in tests:
+      evaluated = self._evaluate_tests(source)
+      self.assertIsInstance(evaluated, Error)
+
+      evaluated = cast(Error, evaluated)
+      self.assertEquals(evaluated.message, expected)
       

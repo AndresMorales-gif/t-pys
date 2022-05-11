@@ -15,6 +15,7 @@ class ObjectType(Enum):
   STRING = auto()
   NULL = auto()
   RETURN = auto()
+  ERROR = auto()
 
 class Object(ABC):
 
